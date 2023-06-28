@@ -4,7 +4,7 @@ experiment_title: 'test'
 target_environment: exynos # desktop / exynos 
 autorunner_mode: FULL # LKAS / FULL
 max_iteration: 1
-duration: 2 # sec
+duration: 1 # sec
 svl_cfg_path: /home/hayeonp/git/2023_Resource_Management_Research/experiment/yaml/svl_scenario.yaml
 
 ADAS_cores: 4-6
@@ -17,7 +17,7 @@ desktop:
   response_time_path: /home/hayeonp/Documents/profiling/response_time
 
 exynos:  
-  target_ip: '192.168.0.8'
+  target_ip: '192.168.0.11'
   rosbridge_cmd: roslaunch /home/hayeonp/rosbridge_websocket.launch
   termination_cmd: ./scripts/terminate_exynos.sh
   response_time_path: /var/lib/lxc/linux1/rootfs/home/root/Documents/profiling/response_time

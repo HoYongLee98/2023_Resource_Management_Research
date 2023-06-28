@@ -275,7 +275,7 @@ def stop_writing_position_info():
 if __name__ == '__main__':
     main_thread_pid = os.getpid()
 
-    slack_webhook = slack_library.get_slack_webhook()
+    slack_webhook = slack_library.get_slack_webhook()    
 
     with open('yaml/svl_auto_experiment_configs.yaml') as f:
         configs = yaml.load(f, Loader=yaml.FullLoader)
@@ -285,6 +285,10 @@ if __name__ == '__main__':
     if target_environment not in ['desktop', 'exynos']:
         print('[Error] Invalid target environment')
         exit()
+
+    # Setup ssh key of host to the exynos board
+    if target_environment == 'exynos':
+        os.system('bash scripts/setup_ssh_key_to_board.bash')
 
     # Create result dir
     does_dir_exist = os.path.exists('results/'+configs['experiment_title'])
@@ -300,10 +304,8 @@ if __name__ == '__main__':
     
     # Backup autoware params
     if target_environment == 'desktop':
-        print('##')
         os.system('cp ~/rubis_ws/src/rubis_autorunner/cfg/cubetown_autorunner/cubetown_autorunner_params.yaml ' + 'results/'+configs['experiment_title']+'/configs')
     elif target_environment == 'exynos':
-        print('!!')
         os.system('scp -r root@' + configs[target_environment]['target_ip'] +':/var/lib/lxc/linux1/rootfs/opt/ros/melodic/share/rubis_autorunner/cfg/cubetown_autorunner/cubetown_autorunner_params.yaml ' + 'results/'+configs['experiment_title']+'/configs')        
 
     # Backup svl scenario
