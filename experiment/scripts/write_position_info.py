@@ -1,6 +1,7 @@
 import math
 from autoware_msgs.msg import LaneArray, NDTStat, VehicleCmd
 from geometry_msgs.msg import PoseStamped
+import geometry_msgs
 from rubis_msgs.msg import TwistStamped
 from visualization_msgs.msg import MarkerArray
 import rospy
@@ -88,13 +89,14 @@ def write_position_info():
     rospy.wait_for_message('/vehicle_cmd', VehicleCmd, timeout=None)
     with open(center_offset_file, "w") as f:
         center_offset_wr = csv.writer(f)
-        center_offset_wr.writerow(['ts', 'state', 'center_offset', 'ndt_response_time(ms)', 'instance', 'gnss_pose_x', 'gnss_pose_y', 'ndt_score', 'current_pose_x', 'current_pose_y'])
+        center_offset_wr.writerow(['ts', 'state', 'center_offset', 'ndt_response_time(ms)', 'instance', 'gnss_pose_x', 'gnss_pose_y', 'ndt_score', 'current_pose_x', 'current_pose_y', 'current_velocity'])
         prev_dis = 0
         while not rospy.is_shutdown():
             gnss_pose_msg = rospy.wait_for_message('/gnss_pose', PoseStamped, timeout=None)
             current_pose_msg = rospy.wait_for_message('/current_pose', PoseStamped, timeout=None)
             ndt_stat_msg = rospy.wait_for_message('/ndt_stat', NDTStat, timeout=None)
             twist_msg = rospy.wait_for_message('/rubis_twist_cmd', TwistStamped, timeout=None)
+            current_velocity_msg = rospy.wait_for_message('/current_velocity', geometry_msgs.msg.TwistStamped, time=None)
 
             instance=twist_msg.instance
 
@@ -121,9 +123,10 @@ def write_position_info():
             ndt_ori_x = current_pose_msg.pose.orientation.x
             ndt_ori_y = current_pose_msg.pose.orientation.y
             ndt_ori_z = current_pose_msg.pose.orientation.z
-            ndt_ori_w = current_pose_msg.pose.orientation.w     
+            ndt_ori_w = current_pose_msg.pose.orientation.w                 
+            current_velocity = current_velocity_msg.twist.linear.x
 
-            center_offset_wr.writerow([time.clock_gettime(time.CLOCK_MONOTONIC), state_text, str(min_dis), str(ndt_stat_msg.exe_time), instance, gnss_pose_x, gnss_pose_y, str(ndt_stat_msg.score), current_pose_x, current_pose_y])
+            center_offset_wr.writerow([time.clock_gettime(time.CLOCK_MONOTONIC), state_text, str(min_dis), str(ndt_stat_msg.exe_time), instance, gnss_pose_x, gnss_pose_y, str(ndt_stat_msg.score), current_pose_x, current_pose_y, current_velocity])
     f.close()
 
 if __name__ == '__main__':
