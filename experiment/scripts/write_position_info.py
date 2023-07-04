@@ -96,7 +96,7 @@ def write_position_info():
             current_pose_msg = rospy.wait_for_message('/current_pose', PoseStamped, timeout=None)
             ndt_stat_msg = rospy.wait_for_message('/ndt_stat', NDTStat, timeout=None)
             twist_msg = rospy.wait_for_message('/rubis_twist_cmd', TwistStamped, timeout=None)
-            current_velocity_msg = rospy.wait_for_message('/current_velocity', geometry_msgs.msg.TwistStamped, time=None)
+            current_velocity_msg = rospy.wait_for_message('/gnss_vel', geometry_msgs.msg.TwistStamped, timeout=None)
 
             instance=twist_msg.instance
 
@@ -125,6 +125,7 @@ def write_position_info():
             ndt_ori_z = current_pose_msg.pose.orientation.z
             ndt_ori_w = current_pose_msg.pose.orientation.w                 
             current_velocity = current_velocity_msg.twist.linear.x
+            if current_velocity > 20: continue
 
             center_offset_wr.writerow([time.clock_gettime(time.CLOCK_MONOTONIC), state_text, str(min_dis), str(ndt_stat_msg.exe_time), instance, gnss_pose_x, gnss_pose_y, str(ndt_stat_msg.score), current_pose_x, current_pose_y, current_velocity])
     f.close()
